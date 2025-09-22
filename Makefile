@@ -29,6 +29,7 @@ install-istio-bin:
 
 setup-istio:
 	istioctl install -f iac/kubernetes/00-istio-operator.yml -y
+	kubectl apply -f iac/kubernetes/00-istio-operator-tracing.yml
 
 setup-istio-crd:
 	kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \

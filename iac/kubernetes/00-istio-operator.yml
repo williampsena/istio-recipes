@@ -9,10 +9,6 @@ spec:
     egressGateways:
     - name: istio-egressgateway
       enabled: false
----
-apiVersion: install.istio.io/v1alpha1
-kind: IstioOperator
-spec:
   meshConfig:
     enableTracing: true
     extensionProviders:
@@ -22,3 +18,4 @@ spec:
         service: otel-collector.istio-example.svc.cluster.local
         resource_detectors:
           environment: {}
+
