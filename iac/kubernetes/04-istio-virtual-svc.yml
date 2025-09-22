@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: greeter
+  namespace: istio-example
+spec:
+  hosts:
+    - greeter
+  http:
+    - route:
+        - destination:
+            host: greeter
+            port:
+              number: 30001
+      retries:
+        attempts: 3         # número de tentativas
+        perTryTimeout: 2s   # timeout por tentativa
+        retryOn: 5xx,connect-failure,refused-stream

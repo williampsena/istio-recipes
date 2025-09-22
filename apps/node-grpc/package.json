@@ -1,0 +1,46 @@
+{
+  "name": "grpc-example",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "scripts": {
+    "start": "ts-node  --require tsconfig-paths/register --require ./src/telemetry/instrumentation.ts src/index.ts",
+    "greeter": "ts-node  --require tsconfig-paths/register --require ./src/telemetry/instrumentation.ts src/greeter.ts",
+    "greeter-joker": "ts-node  --require tsconfig-paths/register --require ./src/telemetry/instrumentation.ts src/greeter_joker.ts",
+    "joker": "ts-node  --require tsconfig-paths/register --require ./src/telemetry/instrumentation.ts src/joker.ts",
+    "proto:gen": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src --ts_proto_opt=esModuleInterop=true,outputServices=grpc-js,forceLong=string ./proto/*.proto",
+    "update:docker": "npm run build:container && npm run tag:container && npm run push:container",
+    "build:container": "docker build -t node-grpc -f Containerfile .",
+    "run:container": "docker run --rm -it -p 50051:50051 node-grpc",
+    "tag:container": "docker tag node-grpc:latest willsenabr/node-grpc:latest",
+    "push:container": "docker push willsenabr/node-grpc:latest"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.9.0",
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
+    "@ollion/protobufjs-typescript-gen": "^2.0.7",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.64.1",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.205.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.205.0",
+    "@opentelemetry/resources": "^1.25.1",
+    "@opentelemetry/sdk-metrics": "^2.1.0",
+    "@opentelemetry/sdk-node": "^0.205.0",
+    "@types/node": "^24.5.2",
+    "protoc": "^32.1.0",
+    "ts-node": "^10.9.2",
+    "ts-proto": "^2.7.7",
+    "ts-protoc-gen": "^0.15.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2",
+    "winston-transport": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/google-protobuf": "^3.15.12",
+    "grpc-tools": "^1.13.0",
+    "grpc_tools_node_protoc_ts": "^5.3.3"
+  }
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package greeter;
+
+service Greeter {
+  rpc Greet (GreeterRequest) returns (GreeterReply);
+}
+
+message GreeterRequest {
+  string name = 1;
+  string lang = 2;
+}
+
+message GreeterReply {
+  string message = 1;
+}

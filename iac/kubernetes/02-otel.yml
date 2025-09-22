@@ -1,0 +1,135 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel
+  namespace: istio-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel
+  template:
+    metadata:
+      labels:
+        app: otel
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: otel
+          image: otel/opentelemetry-collector-contrib:0.123.0
+          command:
+            - "/otelcol-contrib"
+            - "--config=/etc/otel-collector-config.yaml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/otel-collector-config.yaml
+              subPath: otel-collector-config.yaml
+          envFrom:
+            - configMapRef:
+                name: app-config 
+          resources:
+            limits:
+              cpu: 1
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 400Mi
+          ports:
+          - containerPort: 4317
+          - containerPort: 4318
+          - containerPort: 13133
+      volumes:
+        - name: config-volume
+          configMap:
+            name: otel-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-config
+  namespace: istio-example
+  labels:
+    app: otel
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: "greeter"
+              scrape_interval: 30s
+              metrics_path: "/stats/prometheus"
+              static_configs:
+                - targets: ["greeter.istio-example.svc.cluster.local:15090"]
+
+            - job_name: "joker"
+              scrape_interval: 30s
+              metrics_path: "/stats/prometheus"
+              static_configs:
+                - targets: ["joker.istio-example.svc.cluster.local:15090"]
+
+            - job_name: "greeter-joker"
+              scrape_interval: 30s
+              metrics_path: "/stats/prometheus"
+              static_configs:
+                - targets: ["greeter-joker.istio-example.svc.cluster.local:15090"]  
+
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+
+    processors:
+      batch:
+        send_batch_max_size: 1000
+        send_batch_size: 100
+        timeout: 10s
+              
+    exporters:
+      datadog/exporter:
+        api:
+          site: "${env:DD_SITE}"
+          key: "${env:DD_API_KEY}"
+
+    service:
+      pipelines:
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [datadog/exporter]
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [datadog/exporter]
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [batch]
+          exporters: [datadog/exporter]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: istio-example
+  labels:
+    app: otel
+spec:
+  selector:
+    app: otel
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+    - name: health-check
+      protocol: TCP
+      port: 13133
+      targetPort: 13133
+  type: ClusterIP

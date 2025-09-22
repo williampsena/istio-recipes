@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter
+  namespace: istio-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter
+  template:
+    metadata:
+      labels:
+        app: greeter
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15090"
+        prometheus.io/path: "/stats/prometheus"
+    spec:
+      containers:
+        - name: greeter
+          image: willsenabr/node-grpc:latest
+          command: ["npm", "run", "greeter"]
+          ports:
+            - containerPort: 30001
+            - containerPort: 15090
+          env:
+            - name: PORT
+              value: "30001"
+            - name: OTEL_SERVICE_NAME
+              value: greeter
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/metrics
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/traces
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/logs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joker
+  namespace: istio-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joker
+  template:
+    metadata:
+      labels:
+        app: joker
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15090"
+        prometheus.io/path: "/stats/prometheus"
+    spec:
+      containers:
+        - name: joker
+          image: willsenabr/node-grpc:latest
+          command: ["npm", "run", "joker"]
+          ports:
+            - containerPort: 30002
+            - containerPort: 15090
+          env:
+            - name: PORT
+              value: "30002"
+            - name: OTEL_SERVICE_NAME
+              value: joker
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/metrics
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/traces
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/logs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter-joker
+  namespace: istio-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter-joker
+  template:
+    metadata:
+      labels:
+        app: greeter-joker
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15090"
+        prometheus.io/path: "/stats/prometheus"
+    spec:
+      containers:
+        - name: greeter-joker
+          image: willsenabr/node-grpc:latest
+          command: ["npm", "run", "greeter-joker"]
+          ports:
+            - containerPort: 30003
+            - containerPort: 15090
+          env:
+            - name: PORT
+              value: "30003"
+            - name: OTEL_SERVICE_NAME
+              value: greeter-joker
+            - name: GREETER_ADDRESS
+              value: "greeter.istio-example.svc.cluster.local:30001"
+            - name: JOKER_ADDRESS
+              value: "joker.istio-example.svc.cluster.local:30002"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/metrics
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/traces
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              value: http://otel-collector.istio-example.svc.cluster.local:4318/v1/logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeter
+  namespace: istio-example
+spec:
+  selector:
+    app: greeter
+  ports:
+    - name: grpc
+      port: 30001
+      targetPort: 30001
+      nodePort: 30001
+    - name: metrics
+      protocol: TCP
+      port: 15090
+      targetPort: 15090
+      nodePort: 30004
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: joker
+  namespace: istio-example
+spec:
+  selector:
+    app: joker
+  ports:
+    - name: grpc
+      port: 30002
+      targetPort: 30002
+      nodePort: 30002
+    - name: metrics
+      protocol: TCP
+      port: 15090
+      targetPort: 15090
+      nodePort: 30005
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeter-joker
+  namespace: istio-example
+spec:
+  selector:
+    app: greeter-joker
+  ports:
+    - name: grpc
+      port: 30003
+      targetPort: 30003
+      nodePort: 30003
+    - name: metrics
+      protocol: TCP
+      port: 15090
+      targetPort: 15090
+      nodePort: 30006
+  type: NodePort

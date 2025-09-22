@@ -1,0 +1,107 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: greeter
+  namespace: istio-example
+spec:
+  hosts:
+  - greeter
+  http:
+  - match:
+    - headers:
+        content-type:
+          exact: application/grpc
+    timeout: 3s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
+    route:
+    - destination:
+        host: greeter
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: "/"
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+    route:
+    - destination:
+        host: greeter
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: joker
+  namespace: istio-example
+spec:
+  hosts:
+  - joker
+  http:
+  - match:
+    - headers:
+        content-type:
+          exact: application/grpc
+    timeout: 3s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
+    route:
+    - destination:
+        host: joker
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: "/"
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+    route:
+    - destination:
+        host: joker
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: greeter-joker
+  namespace: istio-example
+spec:
+  hosts:
+  - joker
+  http:
+  - match:
+    - headers:
+        content-type:
+          exact: application/grpc
+    timeout: 3s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
+    route:
+    - destination:
+        host: greeter-joker
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: "/"
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+    route:
+    - destination:
+        host: greeter-joker
+        port:
+          number: 80

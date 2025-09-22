@@ -1,0 +1,15 @@
+FROM node:alpine AS base
+
+RUN mkdir /app
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+
+RUN npm install
+
+FROM base AS app
+
+COPY . /app
+
+ENTRYPOINT ["npm", "run"]

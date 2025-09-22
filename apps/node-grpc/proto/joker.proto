@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package joker;
+
+service Joker {
+  rpc Joke (JokerRequest) returns (JokerReply);
+}
+
+message JokerRequest {}
+
+message JokerReply {
+  string joke = 1;
+}
