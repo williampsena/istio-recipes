@@ -1,39 +1,43 @@
-up:
-	kubectl apply \
-		-f ./iac/kubernetes/01-namespace.yml \
-		-f ./iac/kubernetes/02-otel.yml \
-		-f ./iac/kubernetes/03-apps.yml \
-		-f ./iac/kubernetes/04-istio-virtual-svc.yml \
-		-f ./iac/kubernetes/05-destination-rule.yml
+ISTIO_VERSION=1.24.3
 
-down:
-	kubectl delete \
-		-f ./iac/kubernetes/02-otel.yml \
-		-f ./iac/kubernetes/03-apps.yml \
-		-f ./iac/kubernetes/04-istio-virtual-svc.yml \
-		-f ./iac/kubernetes/05-destination-rule.yml
+setup: setup-cluster install-istio install-knative setup-net-istio setup-istio-ports wait-all
 
-rollout:
-	kubectl rollout restart deployment/greeter -n istio-example
-	kubectl rollout restart deployment/joker -n istio-example
-	kubectl rollout restart deployment/greeter-joker -n istio-example
+setup-cluster:
+	@kind get clusters | grep -q knative-local || \
+		kind create cluster --name knative-local --config ./iac/kind-config.yaml
+
+uninstall-istio:
+	@cd istio-$(ISTIO_VERSION) && export PATH=$$PWD/bin:$$PATH && istioctl uninstall -y --purge
+	@echo "[OK] Istio $(ISTIO_VERSION) uninstalled"
 
 install-istio:
-	$(MAKE) install-istio-bin
-	$(MAKE) setup-istio
-	$(MAKE) setup-istio-crd
+	@curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$(ISTIO_VERSION) sh -
+	@cd istio-$(ISTIO_VERSION) && export PATH=$$PWD/bin:$$PATH && istioctl install \
+		--set profile=default \
+		--set hub=docker.io/istio \
+		--set tag=$(ISTIO_VERSION) -y
+	@echo "[OK] Istio $(ISTIO_VERSION) installed"
 
-install-istio-bin:
-	(cd /tmp && curl -L https://istio.io/downloadIstio | sh -)
-	cp /tmp/istio-*/bin/istioctl $(HOME)/.local/bin
+install-knative:
+	@kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.13.0/serving-crds.yaml
+	@kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.13.0/serving-core.yaml
+	@echo "[OK] Knative Serving installed"
 
-setup-istio:
-	istioctl install -f iac/kubernetes/00-istio-operator.yml -y
-	kubectl apply -f iac/kubernetes/00-istio-operator-tracing.yml
+setup-net-istio:
+	@kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v1.20.1/net-istio.yaml
+	@echo "[OK] net-istio installed"
 
-setup-istio-crd:
-	kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-	{ kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.3.0" | kubectl apply -f -; }
+setup-istio-ports:
+	kubectl patch service istio-ingressgateway -n istio-system --type='json' \
+		-p='[{"op": "replace", "path": "/spec/type", "value": "NodePort"}, {"op": "add", "path": "/spec/ports/1/nodePort", "value": 30080}, {"op": "add", "path": "/spec/ports/2/nodePort", "value": 30443}]'
 
-setup-istio-ns:
-	kubectl label namespace istio-example istio-injection=enabled --overwrite
+wait-all:
+	@kubectl wait --for=condition=available deployment --all -n istio-system --timeout=300s
+	@kubectl wait --for=condition=available deployment --all -n knative-serving --timeout=300s
+	@echo "[OK] All deployments done"
+
+forward:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80
+
+delete-cluster:
+	@kind delete cluster --name knative-local

@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <title>{{ title }} </title>
+    <style lang="css">
+      :root{
+        --bg: #282a36;
+        --current-line: #44475a;
+        --selection: #44475a;
+        --foreground: #f8f8f2;
+        --comment: #6272a4;
+        --cyan: #8be9fd;
+        --green: #50fa7b;
+        --orange: #ffb86c;
+        --pink: #ff79c6;
+        --purple: #bd93f9;
+        --red: #ff5555;
+      }
+
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(180deg, var(--bg) 0%, #1e1f29 100%);
+        color: var(--foreground);
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1.5;
+      }
+
+      ::selection {
+        background: var(--selection);
+        color: var(--foreground);
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(40,42,54,0.06);
+        border-radius: 12px;
+        box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+      }
+
+      h1,h2,h3,h4 {
+        color: var(--foreground);
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+      }
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.5rem; color: var(--purple); }
+
+      p {
+        color: #e6e6e6;
+        margin: 0 0 1rem 0;
+      }
+      small { color: var(--comment); }
+
+      ::-webkit-scrollbar { height: 10px; width: 10px; }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(139,233,253,0.12);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>{{ subject }}</h1>
+      <p>
+        {{ message }}
+      </p>
+      <p>
+       📌 Has stick? {{ stickyCookie }}
+      </p>
+    </div>
+  </body>
+</html>

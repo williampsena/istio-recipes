@@ -1,0 +1,19 @@
+FROM node:alpine AS base
+
+RUN mkdir /app
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+
+RUN npm install
+
+FROM base AS app
+
+ARG REVISION
+
+ENV REVISION=${REVISION}
+
+COPY . /app
+
+ENTRYPOINT ["npm", "run"]

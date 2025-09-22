@@ -1,0 +1,62 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: express-sticky-vs
+  namespace: sticky-sessions
+spec:
+  hosts:
+    - express-sticky.sticky-sessions.svc.cluster.local
+  gateways:
+    - knative-serving/knative-ingress-gateway
+  http:
+    # Cookie route v1
+    - match:
+        - headers:
+            cookie:
+              regex: ".*session-version=express-sticky-v1.*"
+      route:
+        - destination:
+            host: express-sticky.sticky-sessions.svc.cluster.local # v1-express-sticky.sticky-sessions.svc.cluster.local
+          headers:
+            request:
+              set:
+                Knative-Serving-Revision: "express-sticky-v1"
+                Knative-Serving-Tag: "v1"
+      fault:
+        abort:
+          percentage:
+            value: 0
+      
+    # Cookie route v2
+    - match:
+        - headers:
+            cookie:
+              regex: ".*session-version=express-sticky-v2.*"
+      route:
+        - destination:
+            host: express-sticky.sticky-sessions.svc.cluster.local # v2-express-sticky.sticky-sessions.svc.cluster.local
+          headers:
+            request:
+              set:
+                Knative-Serving-Revision: "express-sticky-v2"
+                Knative-Serving-Tag: "v2"
+
+    # Cookie route v99
+    - match:
+        - headers:
+            cookie:
+              regex: ".*session-version=express-sticky-v99.*"
+      route:
+        - destination:
+            host: express-sticky.sticky-sessions.svc.cluster.local
+          headers:
+            request:
+              set:
+                Knative-Serving-Revision: "express-sticky-v99"
+                Knative-Serving-Tag: "v99"
+    
+    
+    # Fallback
+    - route:
+        - destination:
+            host: express-sticky.sticky-sessions.svc.cluster.local

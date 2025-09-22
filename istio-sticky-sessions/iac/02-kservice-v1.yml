@@ -1,0 +1,22 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: express-sticky
+  namespace: sticky-sessions
+spec:
+  template:
+    metadata:
+      name: express-sticky-v1
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+    spec:
+      containers:
+        - image: willsenabr/express-sticky:v1
+          command: ["npm", "start"]
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+  traffic:
+    - revisionName: express-sticky-v1
+      tag: v1
+      percent: 100

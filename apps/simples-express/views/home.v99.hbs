@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <title>{{ title }} </title>
+    <style lang="css">
+      :root {
+          --bg: #fdf6e3;
+          --bg-alt: #fff9e8;
+          --foreground: #3c3836;
+          --muted: #7c6f64;
+
+          --yellow: #f2c96d;
+          --orange: #f29d52;
+          --blue: #5d80ae;
+          --green: #8cab6f;
+          --red: #d86363;
+          --purple: #ae86d3;
+
+          --border: #e6d6b8;
+        }
+
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          background: var(--bg);
+          color: var(--foreground);
+          font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        ::selection {
+          background: #ffe8b3;
+          color: var(--foreground);
+        }
+
+        .container {
+          max-width: 950px;
+          margin: 2.5rem auto;
+          padding: 2rem;
+          background: var(--bg-alt);
+          border-radius: 14px;
+          border: 1px solid var(--border);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        h1, h2, h3, h4 {
+          margin: 0 0 0.7rem 0;
+          font-weight: 600;
+        }
+        h1 { font-size: 2rem; }
+        h2 { color: var(--orange); }
+
+        p {
+          line-height: 1.6;
+        }
+        small { color: var(--muted); }
+
+        ::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #eedbb0;
+          border-radius: 10px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>{{ subject }}</h1>
+      <p>
+        {{ message }}
+      </p>
+      <p>
+       📌 Has stick? {{ stickyCookie }}
+      </p>
+    </div>
+  </body>
+</html>

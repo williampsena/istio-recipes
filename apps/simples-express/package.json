@@ -1,0 +1,21 @@
+{
+  "name": "simples-express",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "setup": "npm run build:images && npm run deploy:images",
+    "build:images": "make build-image",
+    "deploy:images": "make push-image"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.4",
+    "hbs": "^4.2.0"
+  }
+}
