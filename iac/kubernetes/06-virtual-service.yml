@@ -77,7 +77,7 @@ metadata:
   namespace: istio-example
 spec:
   hosts:
-  - joker
+  - greeter-joker
   http:
   - match:
     - headers:
