@@ -1,16 +1,14 @@
 #!/bin/bash
 
 HOST="localhost:30001"
-METHOD="greeterJoker.GreeterJoker/Greet"
 COUNT="${COUNT:-50}"
-PROTO_FILE="apps/node-grpc/proto/greeter_joker.proto"
+METHOD="greeter.Greeter/Greet"
+PROTO_FILE="apps/node-grpc/proto/greeter.proto"
 CONCURRENT_WORKERS="${CONCURRENT_WORKERS:-10}"
 TEMP_DIR="/tmp/load_test_$$"
 
-# Create temporary directory for results
 mkdir -p "$TEMP_DIR"
 
-# Function to make an individual request
 make_request() {
     local id=$1
     local temp_dir=$2
@@ -26,7 +24,6 @@ make_request() {
     fi
 }
 
-# Export function to use with parallel/background jobs
 export -f make_request
 export HOST METHOD PROTO_FILE
 
@@ -54,21 +51,17 @@ for ((batch_start=1; batch_start<=COUNT; batch_start+=CONCURRENT_WORKERS)); do
         make_request $i "$TEMP_DIR" &
     done
     
-    # Wait for all batch jobs to finish
     wait
     
-    # Show progress
     completed=$batch_end
     echo "✅ Completed: $completed/$COUNT"
     
-    # Small pause between batches
     sleep 0.5
 done
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
 
-# Count results
 SUCCESS=$(find "$TEMP_DIR" -name "result_*" -exec cat {} \; | grep -c "success")
 FAILED=$(find "$TEMP_DIR" -name "result_*" -exec cat {} \; | grep -c "failed")
 
@@ -85,7 +78,6 @@ else
     echo "📊 Success: $((SUCCESS * 100 / COUNT))%"
 fi
 
-# Show error log if any
 if [ $FAILED -gt 0 ]; then
     echo ""
     echo "🔍 Errors found:"
@@ -95,5 +87,4 @@ if [ $FAILED -gt 0 ]; then
     fi
 fi
 
-# Clean up temporary files
 rm -rf "$TEMP_DIR"
