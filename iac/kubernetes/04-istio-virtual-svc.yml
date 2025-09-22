@@ -13,6 +13,6 @@ spec:
             port:
               number: 30001
       retries:
-        attempts: 3         # número de tentativas
-        perTryTimeout: 2s   # timeout por tentativa
+        attempts: 3
+        perTryTimeout: 2s
         retryOn: 5xx,connect-failure,refused-stream

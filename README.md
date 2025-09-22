@@ -52,4 +52,11 @@ curl http://localhost:15000/stats
 
 kubectl port-forward -n istio-example deployment/greeter 15090:15090
 curl http://localhost:15090/stats/prometheus
-```# istio-recipes
+```
+
+## Remove Virtual Services
+
+```shell
+kubectl delete virtualservice --all -n NAMESPACE
+```
+

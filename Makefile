@@ -34,3 +34,6 @@ setup-istio:
 setup-istio-crd:
 	kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
 	{ kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.3.0" | kubectl apply -f -; }
+
+setup-istio-ns:
+	kubectl label namespace istio-example istio-injection=enabled --overwrite

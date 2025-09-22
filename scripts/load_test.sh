@@ -1,9 +1,9 @@
 #!/bin/bash
 
 HOST="localhost:30001"
-METHOD="greeter.Greeter/Greet"
+METHOD="greeterJoker.GreeterJoker/Greet"
 COUNT="${COUNT:-50}"
-PROTO_FILE="apps/node-grpc/proto/greeter.proto"
+PROTO_FILE="apps/node-grpc/proto/greeter_joker.proto"
 CONCURRENT_WORKERS="${CONCURRENT_WORKERS:-10}"
 TEMP_DIR="/tmp/load_test_$$"
 

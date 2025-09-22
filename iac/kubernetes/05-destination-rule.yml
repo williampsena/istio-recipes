@@ -23,4 +23,4 @@ spec:
     loadBalancer:
       simple: ROUND_ROBIN
     tls:
-      mode: DISABLE  # plaintext gRPC
+      mode: DISABLE
