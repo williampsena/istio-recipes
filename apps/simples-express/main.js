@@ -30,10 +30,10 @@ app.get("/", async (req, res) => {
 
   res.render(HOME_VIEW, {
     revision: REV,
-    title: `🏠 Home ${REV}`,
-    subject: `📚 Using Knative revision ${K_REVISION} at image revision ${REV}`,
+    title: `🏠 Home ${K_REVISION}`,
+    subject: `Using revision 📚 ${REV}`,
     message: `😂 ${joke} 🙃`,
-    stickyCookie: sessionVersion || "generated now",
+    stickyCookie: sessionVersion || "generated now 🔥",
   })
 })
 

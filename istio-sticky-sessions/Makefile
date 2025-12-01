@@ -12,7 +12,10 @@ up:
 		-f ./iac/03-virtual-service.yml
 
 up-v99:
-	@kubectl apply -f ./iac/02-kservice-v99-patch.yml
+	@kubectl apply -f ./iac/02-kservice-v99-only.yml
+
+up-v99-zero-traffic:
+	@kubectl apply -f ./iac/02-kservice-v99-zero-traffic.yml
 
 down:
 	@kubectl delete \

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>{{ title }} </title>
+    <title>{{ title }} ✨</title>
     <style lang="css">
       :root{
         --bg: #282a36;
@@ -67,12 +67,21 @@
   </head>
   <body>
     <div class="container">
-      <h1>{{ subject }}</h1>
+      <h1>💌 {{ subject }}</h1>
+
       <p>
         {{ message }}
       </p>
+
       <p>
-       📌 Has stick? {{ stickyCookie }}
+        📌 Sticky Session:  
+        <span class="badge">
+          {{ stickyCookie }}
+        </span>
+      </p>
+
+      <p style="margin-top: 2rem;">
+        ✨ <small>Generated automatically — {{ title }}</small>
       </p>
     </div>
   </body>
