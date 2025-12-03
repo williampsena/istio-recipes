@@ -1,37 +1,38 @@
-setup-knative-route:
-	@kubectl -n knative-serving patch configmap config-features \
-  --type=merge -p '{"data":{"tag-header-based-routing":"enabled"}}'
+CLUSTER_NAME=knative-local
 
-up:
+activate-cluster:
+	@echo '🖥️ Activating cluster'
+	@kubectl config use-context kind-$(CLUSTER_NAME)
+
+up: activate-cluster
 	@kubectl apply \
 		-f ./iac/01-namespace.yml \
 		-f ./iac/02-kservice-v1.yml \
 		-f ./iac/02-kservice-v2.yml \
 		-f ./iac/02-kservice-v99.yml \
-		-f ./iac/02-kservice-all.yml \
 		-f ./iac/03-virtual-service.yml
 
-up-v99:
+up-v99: activate-cluster
 	@kubectl apply -f ./iac/02-kservice-v99-only.yml
 
-up-v99-zero-traffic:
+up-v99-zero-traffic: activate-cluster
 	@kubectl apply -f ./iac/02-kservice-v99-zero-traffic.yml
 
-down:
+down: activate-cluster
 	@kubectl delete \
-		-f ./iac/02-kservice-v1.yml \
-		-f ./iac/03-virtual-service.yml
+		-f ./iac/03-virtual-service.yml \
+		-f ./iac/01-namespace.yml \
 
-revisions:
+revisions: activate-cluster
 	@kubectl get revisions -n sticky-sessions
 
-revision:
+revision: activate-cluster
 	@kubectl describe revision express-sticky-v1 -n sticky-sessions
 
-pods:
+pods: activate-cluster
 	@kubectl get pods -n sticky-sessions
 
-logs:
+logs: activate-cluster
 	@kubectl logs -n sticky-sessions -l serving.knative.dev/service=express-sticky -c user-container --tail=100
 
 test:

@@ -6,7 +6,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: express-sticky-v99
+      name: express-sticky-v99-only
       annotations:
         autoscaling.knative.dev/minScale: "0"
     spec:
