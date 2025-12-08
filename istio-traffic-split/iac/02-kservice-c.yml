@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: app-c
+  namespace: traffic-split
+spec:
+  template:
+    metadata:
+      name: app-c-c
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+    spec:
+      containers:
+        - name: user-container
+          image: willsenabr/express-sticky:v99
+          command: ["npm", "start"]
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+  traffic:
+    - revisionName: app-c-c
+      tag: c
+      percent: 100

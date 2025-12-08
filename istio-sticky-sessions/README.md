@@ -1,6 +1,6 @@
 # 🚀 Istio Examples — Sticky Sessions
 
-This repository contains useful examples to help you quickly get started with Istio and perform real-world tests involving traffic management, revisions, and sticky sessions.
+This repository provides practical examples to help you quickly explore Istio + Knative, focusing on real-world scenarios such as traffic management, service revisions, and sticky sessions
 
 ## 🛠️ Initial Setup
 ### 🏗️ Build container images
@@ -9,36 +9,80 @@ cd apps/simples-express
 npm run setup
 ```
 
-### ☸️ Set up the cluster (at root directory)
+### ☸️ Set up the cluster (from the repository root)
 ```shell
 make setup-cluster
 ```
 
-### 📦 Bring up the pods
+## 📦 Deploy Knative Route and start the pods
 ```shell
 make setup-knative-route
 make up
 ```
 
-### 🔄 How to Test Sticky Sessions by Revision
+## 🧩 Configure /etc/hosts
 
-To validate how Knative (with Istio) handles sticky sessions across revisions, follow the steps below:
+Edit your hosts file:
 
-- 🧪 Open multiple private browser windows or use different browsers.
-Each browser will acquire a separate sticky session tied to a specific revision.
+```shell
+sudo nano /etc/hosts
+```
 
-- 🍪 If a browser does not stick to the revision you want,
-delete the cookie and refresh the page until you get different revisions assigned to different browsers.
+Add the following entry:
 
-- 🔧 After that, you can apply the v99 patch using:
+```
+127.0.0.1   localhost express-sticky.sticky-sessions.svc.cluster.local
+```
+
+### Set your /etc/hosts
+
+```shell
+nano /etc/hosts
+```
+
+```
+127.0.0.1        localhost express-sticky.sticky-sessions.svc.cluster.local
+```
+
+## 🔄 Testing Sticky Sessions by Revision
+
+This section explains how to validate sticky session behavior across Knative revisions using Istio.
+
+*✔️ Step 1 — Simulate independent user sessions*
+
+To observe how sticky sessions behave:
+
+- Open multiple private/incognito windows, or use different browsers.
+- Each browser instance will receive its own sticky session cookie, binding it to a specific revision.
+
+*✔️ Step 2 — Control session assignment*
+
+If a browser does not stick to the desired revision:
+
+- Clear the cookie for the application.
+- Refresh the page until different browsers attach to different revisions.
+
+### 🚦 Promoting Revisions & Testing Fallbacks
+*🔧 Apply the v99 patch*
+
+Use the following command:
+
 ```shell
 make up-v99
 ```
-- This command replaces v99 with the version you want to promote.
-- This simulates a scenario where you have a problematic revision and need to force users to migrate to a new one.
-- Knative's fallback should route users to a healthy revision without returning 503 errors.
-- If you want to test a scenario where Knative handles old revisions by scaling to zero, execute the following command and check pods:
+
+This action:
+
+- Replaces the v99 revision with the version you want to promote.
+- Simulates a real scenario where a problematic or deprecated revision must be replaced.
+- Allows you to validate whether Knative’s fallback mechanism correctly routes traffic to a healthy revision without returning 503 errors.
+
+### 💤 Simulating Scale-to-Zero Behavior
+
+To test how Knative handles older revisions by scaling them down to zero replicas:
 
 ```shell
 make up-v99-zero-traffic
 ```
+
+After running the command, inspect the pods to confirm scale-to-zero behavior.

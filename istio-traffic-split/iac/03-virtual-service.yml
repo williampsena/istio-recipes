@@ -1,0 +1,85 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: app-vs
+  namespace: traffic-split
+spec:
+  hosts:
+  - app.traffic-split.example.com
+  gateways:
+  - knative-serving/knative-ingress-gateway
+  http:
+  # Route with cookie c
+  - match:
+    - headers:
+        cookie:
+          regex: ".*session-version=app-c-c.*"
+    route:
+    - destination:
+        host: app-c.traffic-split.svc.cluster.local
+        port:
+          number: 80
+    headers:
+      request:
+        set:
+          Host: app-c.traffic-split.example.com
+
+  # Route with cookie b
+  - match:
+    - headers:
+        cookie:
+          regex: ".*session-version=app-b-b.*"
+    route:
+    - destination:
+        host: app-b.traffic-split.svc.cluster.local
+        port:
+          number: 80
+    headers:
+      request:
+        set:
+          Host: app-b.traffic-split.example.com
+  
+  # Route with cookie a
+  - match:
+    - headers:
+        cookie:
+          regex: ".*session-version=app-a-a.*"
+    route:
+    - destination:
+        host: app-a.traffic-split.svc.cluster.local
+        port:
+          number: 80
+    headers:
+      request:
+        set:
+          Host: app-a.traffic-split.example.com
+  
+  # Rota 3: FALLBACK - no cookie Traffic Split
+  - route:
+    - destination:
+        host: app-a.traffic-split.svc.cluster.local
+        port:
+          number: 80
+      weight: 33
+      headers:
+        request:
+          set:
+            Host: app-a.traffic-split.example.com
+    - destination:
+        host: app-b.traffic-split.svc.cluster.local
+        port:
+          number: 80
+      weight: 33
+      headers:
+        request:
+          set:
+            Host: app-b.traffic-split.example.com
+    - destination:
+        host: app-c.traffic-split.svc.cluster.local
+        port:
+          number: 80
+      weight: 34
+      headers:
+        request:
+          set:
+            Host: app-c.traffic-split.example.com
